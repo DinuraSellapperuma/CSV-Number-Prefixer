@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSV Number Prefixer</title>
-    <!-- Include Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body class="bg-gray-100 h-screen flex items-center justify-center">
     <div class="bg-white rounded-lg p-8 shadow-md w-96">
         <h2 class="text-2xl font-bold mb-4 text-center">Upload CSV and Add "94" Prefix</h2>
-        <!-- Styled file input button -->
         <input type="file" id="csvFileInput" accept=".csv" class="hidden">
         <label for="csvFileInput" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-blue-600 inline-block text-center">
             Choose CSV File
@@ -20,39 +17,6 @@
         <button onclick="processCSV()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mt-4">Process CSV</button><br><br>
         <a id="downloadLink" style="display: none;" class="text-blue-500 hover:underline block text-center">Download Processed CSV</a>
     </div>
-
-    <script>
-        function processCSV() {
-            const fileInput = document.getElementById('csvFileInput');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                alert('Please select a file.');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const csvData = event.target.result;
-                const csvArray = csvData.split('\n').map(row => row.trim());
-                const processedCSV = csvArray.map(row => '94' + row).join('\n');
-                const processedBlob = new Blob([processedCSV], { type: 'text/csv' });
-                const downloadLink = document.getElementById('downloadLink');
-                downloadLink.href = URL.createObjectURL(processedBlob);
-                downloadLink.download = 'processed_csv.csv';
-                downloadLink.style.display = 'block';
-            };
-
-            reader.readAsText(file);
-        }
-    </script>
-
-    <style>
-        /* Style for file input button */
-        .hidden {
-            display: none;
-        }
-    </style>
+    <script src="script.js"></script>
 </body>
-
 </html>
