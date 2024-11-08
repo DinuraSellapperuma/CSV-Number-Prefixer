@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Lankan Number Formatter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {"50":"#eff6ff","100":"#dbeafe","200":"#bfdbfe","300":"#93c5fd","400":"#60a5fa","500":"#3b82f6","600":"#2563eb","700":"#1d4ed8","800":"#1e40af","900":"#1e3a8a","950":"#172554"}
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full space-y-6">
+        <!-- Main Card -->
+        <div class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+            <!-- Header -->
+            <div class="space-y-2">
+                <h2 class="text-3xl font-bold text-gray-900 text-center">Number Formatter</h2>
+                <p class="text-gray-500 text-center text-sm">Convert Sri Lankan numbers to international format</p>
+            </div>
+
+            <!-- Error Alert -->
+            <div id="errorAlert" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <span id="errorMessage" class="block sm:inline"></span>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-center w-full">
+                    <label class="flex flex-col w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-8 h-8 mb-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-gray-500">CSV file with phone numbers (max 250MB)</p>
+                        </div>
+                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                    </label>
+                </div>
+
+                <!-- Process Button -->
+                <button id="processButton" onclick="processCSV()" class="w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+                    <span id="buttonText">Process Numbers</span>
+                    <svg id="loadingSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Stats Section -->
+            <div id="stats" class="hidden space-y-3 bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">Processing Status</span>
+                    <span id="statusBadge" class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Complete</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span id="validCount" class="text-sm text-green-600"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span id="invalidCount" class="text-sm text-red-600"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Buttons Container -->
+            <div id="downloadButtons" class="hidden space-y-3">
+                <a id="downloadLink" class="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Valid Numbers
+                </a>
+                
+                <a id="downloadInvalidLink" class="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Invalid Numbers
+                </a>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">Supported Formats</h3>
+            <div class="space-y-2">
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    0769876543 → 94769876543
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    769876543 → 94769876543
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    94769876543 → 94769876543
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    +94769876543 → 94769876543
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showError(message) {
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorAlert.classList.remove('hidden');
+            setTimeout(() => {
+                errorAlert.classList.add('hidden');
+            }, 5000);
+        }
+
+        function setLoading(loading) {
+            const button = document.getElementById('processButton');
+            const buttonText = document.getElementById('buttonText');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            button.disabled = loading;
+            if (loading) {
+                buttonText.textContent = 'Processing...';
+                spinner.classList.remove('hidden');
+            } else {
+                buttonText.textContent = 'Process Numbers';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function isValidSLNumber(number) {
+            // Remove any plus sign and spaces
+            number = number.replace(/^\+/, '').replace(/\s+/g, '');
+            
+            // Remove all non-digit characters
+            number = number.replace(/\D/g, '');
+            
+            // If starts with 94, remove it to check the base number
+            if (number.startsWith('94')) {
+                number = number.substring(2);
+            }
+            
+            // If starts with 0, remove it
+            if (number.startsWith('0')) {
+                number = number.substring(1);
+            }
+            
+            // Check if the remaining number is 9 digits and starts with 7
+            // Also allow numbers starting with 11 (emergency), 2 (Colombo), 3 (Gampaha), etc.
+            const validPrefixes = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            return number.length === 9 && validPrefixes.some(prefix => number.startsWith(prefix));
+        }
+
+        function formatSLNumber(number) {
+            // Remove any plus sign and spaces
+            number = number.replace(/^\+/, '').replace(/\s+/g, '');
+            
+            // Remove all non-digit characters
+            number = number.replace(/\D/g, '');
+            
+            // If already starts with 94, remove it
+            if (number.startsWith('94')) {
+                number = number.substring(2);
+            }
+            
+            // If starts with 0, remove it
+            if (number.startsWith('0')) {
+                number = number.substring(1);
+            }
+            
+            // Add 94 prefix
+            return '94' + number;
+        }
+
+        async function processCSV() {
+            const fileInput = document.getElementById('csvFileInput');
+            const file = fileInput.files[0];
+            
+            // Reset UI
+            document.getElementById('stats').classList.add('hidden');
+            document.getElementById('downloadButtons').classList.add('hidden');
+            
+            // Validate file input
+            if (!file) {
+                showError('Please select a file.');
+                return;
+            }
+
+            // Validate file type
+            if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+                showError('Please upload a valid CSV file.');
+                return;
+            }
+
+            // Validate file size (250MB limit)
+            if (file.size > 250 * 1024 * 1024) {
+                showError('File size exceeds 250MB limit.');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        try {
+                            const csvData = event.target.result;
+                            const csvArray = csvData.split('\n')
+                                .map(row => row.trim())
+                                .filter(row => row);
+                            
+                            if (csvArray.length === 0) {
+                                reject(new Error('The file is empty.'));
+                                return;
+                            }
+
+                            let validNumbers = [];
+                            let invalidNumbers = [];
+                            
+                            csvArray.forEach((row, index) => {
+                                const number = row.trim();
+                                if (isValidSLNumber(number)) {
+                                    validNumbers.push(formatSLNumber(number));
+                                } else {
+                                    invalidNumbers.push({
+                                        line: index + 1,
+                                        number: number
+                                    });
+                                }
+                            });
+
+                            resolve({ validNumbers, invalidNumbers });
+                        } catch (error) {
+                            reject(new Error('Error processing CSV: ' + error.message));
+                        }
+                    };
+                    
+                    reader.onerror = () => reject(new Error('Error reading file.'));
+                    reader.readAsText(file);
+                });
+
+                // Show stats
+                const statsDiv = document.getElementById('stats');
+                const validCountElem = document.getElementById('validCount');
+                const invalidCountElem = document.getElementById('invalidCount');
+                
+                statsDiv.classList.remove('hidden');
+                validCountElem.textContent = `Valid numbers: ${result.validNumbers.length}`;
+                invalidCountElem.textContent = `Invalid numbers: ${result.invalidNumbers.length}`;
+
+                // Show download buttons
+                const downloadButtons = document.getElementById('downloadButtons');
+                downloadButtons.classList.remove('hidden');
+
+                // Create valid numbers download link
+                const validBlob = new Blob([result.validNumbers.join('\n')], { type: 'text/csv' });
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = URL.createObjectURL(validBlob);
+                downloadLink.download = 'valid_numbers.csv';
+
+                // Create invalid numbers download link with line numbers
+                const invalidContent = result.invalidNumbers
+                    .map(item => `Line ${item.line}: ${item.number}`)
+                    .join('\n');
+                const invalidBlob = new Blob([invalidContent], { type: 'text/csv' });
+                const downloadInvalidLink = document.getElementById('downloadInvalidLink');
+                downloadInvalidLink.href = URL.createObjectURL(invalidBlob);
+                downloadInvalidLink.download = 'invalid_numbers.csv';
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Drag and drop functionality
+        const dropZone = document.querySelector('label');
+        const validFileTypes = ['text/csv', 'application/vnd.ms-excel'];
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('bg-gray-50', 'border-primary-500');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('bg-gray-50', 'border-primary-500');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 1) {
+                showError('Please drop only one file.');
+                return;
+            }
+
+            const file = files[0];
+            if (!validFileTypes.includes(file.type) && !file.name.endsWith('.csv')) {
+                showError('Please upload a valid CSV file.');
+                return;
+            }
+
+            if (file.size > 250 * 1024 * 1024) {
+                showError('File size exceeds 250MB limit.');
+                return;
+            }
+
+            document.getElementById('csvFileInput').files = files;
+        }
+    </script>
+</body>
+</html>
