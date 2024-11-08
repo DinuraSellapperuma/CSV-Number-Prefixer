@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Lankan Number Formatter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {"50":"#eff6ff","100":"#dbeafe","200":"#bfdbfe","300":"#93c5fd","400":"#60a5fa","500":"#3b82f6","600":"#2563eb","700":"#1d4ed8","800":"#1e40af","900":"#1e3a8a","950":"#172554"}
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full space-y-6">
+        <!-- Main Card -->
+        <div class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+            <!-- Header -->
+            <div class="space-y-2">
+                <h2 class="text-3xl font-bold text-gray-900 text-center">Number Formatter</h2>
+                <p class="text-gray-500 text-center text-sm">Convert Sri Lankan numbers to international format</p>
+            </div>
+
+            <!-- Toggle Switch -->
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700">Filter out landline numbers</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="filterLandline" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-center w-full">
+                    <label class="flex flex-col w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-8 h-8 mb-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-gray-500">CSV file with phone numbers (max 250MB)</p>
+                        </div>
+                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                    </label>
+                </div>
+
+                <!-- Process Button -->
+                <button onclick="processCSV()" class="w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+                    Process Numbers
+                </button>
+            </div>
+
+            <!-- Stats Section -->
+            <div id="stats" class="hidden space-y-3 bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">Processing Status</span>
+                    <span id="statusBadge" class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Complete</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span id="validCount" class="text-sm text-green-600"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span id="invalidCount" class="text-sm text-red-600"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div id="landlineCountContainer" class="flex items-center justify-between hidden">
+                        <span id="landlineCount" class="text-sm text-blue-600"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Buttons Container -->
+            <div id="downloadButtons" class="hidden space-y-3">
+                <!-- Valid Numbers Download Button -->
+                <a id="downloadLink" class="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Valid Numbers
+                </a>
+                
+                <!-- Invalid Numbers Download Button -->
+                <a id="downloadInvalidLink" class="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Invalid Numbers
+                </a>
+
+                <!-- Landline Numbers Download Button -->
+                <a id="downloadLandlineLink" class="hidden w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Landline Numbers
+                </a>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">Supported Formats</h3>
+            <div class="space-y-2">
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    0769876543 → 94769876543
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    769876543 → 94769876543
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    94769876543 → 94769876543
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    +94769876543 → 94769876543
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function isValidSLNumber(number) {
+            // Remove any plus sign
+            number = number.replace(/^\+/, '');
+            
+            // Remove all non-digit characters
+            number = number.replace(/\D/g, '');
+            
+            // If starts with 94, remove it to check the base number
+            if (number.startsWith('94')) {
+                number = number.substring(2);
+            }
+            
+            // If starts with 0, remove it
+            if (number.startsWith('0')) {
+                number = number.substring(1);
+            }
+            
+            // Check if the remaining number is 9 digits and starts with 7
+            return number.length === 9 && number.startsWith('7');
+        }
+
+        function isLandlineNumber(number) {
+            // Remove any plus sign and non-digit characters
+            number = number.replace(/^\+/, '').replace(/\D/g, '');
+            
+            // Remove 94 prefix if present
+            if (number.startsWith('94')) {
+                number = number.substring(2);
+            }
+            
+            // Remove leading 0 if present
+            if (number.startsWith('0')) {
+                number = number.substring(1);
+            }
+            
+            // Check if the remaining number is 9 digits and starts with 1-6 or 8-9
+            return number.length === 9 && /^[1-689]/.test(number);
+        }
+
+        function formatSLNumber(number) {
+            // Remove any plus sign
+            number = number.replace(/^\+/, '');
+            
+            // Remove all non-digit characters
+            number = number.replace(/\D/g, '');
+            
+            // If already starts with 94, remove it
+            if (number.startsWith('94')) {
+                number = number.substring(2);
+            }
+            
+            // If starts with 0, remove it
+            if (number.startsWith('0')) {
+                number = number.substring(1);
+            }
+            
+            // Add 94 prefix
+            return '94' + number;
+        }
+
+        function processCSV() {
+            const fileInput = document.getElementById('csvFileInput');
+            const file = fileInput.files[0];
+            const filterLandline = document.getElementById('filterLandline').checked;
+            
+            if (!file) {
+                alert('Please select a file.');
+                return;
+            }
+
+            // Check file size (250MB = 250 * 1024 * 1024 bytes)
+            if (file.size > 250 * 1024 * 1024) {
+                alert('File size exceeds 250MB limit. Please select a smaller file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const csvData = event.target.result;
+                const csvArray = csvData.split('\n').map(row => row.trim()).filter(row => row);
+                
+                let validNumbers = [];
+                let invalidNumbers = [];
+                let landlineNumbers = [];
+                
+                csvArray.forEach(row => {
+                    const number = row.trim();
+                    if (isValidSLNumber(number)) {
+                        validNumbers.push(formatSLNumber(number));
+                    } else if (isLandlineNumber(number)) {
+                        if (filterLandline) {
+                            landlineNumbers.push(formatSLNumber(number));
+                        } else {
+                            validNumbers.push(formatSLNumber(number));
+                        }
+                    } else {
+                        invalidNumbers.push(number);
+                    }
+                });
+
+                // Show stats
+                const statsDiv = document.getElementById('stats');
+                const validCountElem = document.getElementById('validCount');
+                const invalidCountElem = document.getElementById('invalidCount');
+                const landlineCountElem = document.getElementById('landlineCount');
+                const landlineCountContainer = document.getElementById('landlineCountContainer');
+                
+                statsDiv.classList.remove('hidden');
+                validCountElem.textContent = `Valid numbers: ${validNumbers.length}`;
+                invalidCountElem.textContent = `Invalid numbers: ${invalidNumbers.length}`;
+                
+                if (filterLandline && landlineNumbers.length > 0) {
+                    landlineCountContainer.classList.remove('hidden');
+                    landlineCountElem.textContent = `Landline numbers: ${landlineNumbers.length}`;
+                } else {
+                    landlineCountContainer.classList.add('hidden');
+                }
+
+                // Show download buttons container
+                const downloadButtons = document.getElementById('downloadButtons');
+                downloadButtons.classList.remove('hidden');
+
+                // Create valid numbers download link
+                const validBlob = new Blob([validNumbers.join('\n')], { type: 'text/csv' });
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = URL.createObjectURL(validBlob);
+                downloadLink.download = 'valid_numbers.csv';
+
+                // Create invalid numbers download link
+                const invalidBlob = new Blob([invalidNumbers.join('\n')], { type: 'text/csv' });
+                const downloadInvalidLink = document.getElementById('downloadInvalidLink');
+                downloadInvalidLink.href = URL.createObjectURL(invalidBlob);
+                downloadInvalidLink.download = 'invalid_numbers.csv';
+
+                // Handle landline numbers download link
+                const downloadLandlineLink = document.getElementById('downloadLandlineLink');
+                if (filterLandline && landlineNumbers.length > 0) {
+                    const landlineBlob = new Blob([landlineNumbers.join('\n')], { type: 'text/csv' });
+                    downloadLandlineLink.href = URL.createObjectURL(landlineBlob);
+                    downloadLandlineLink.download = 'landline_numbers.csv';
+                    downloadLandlineLink.classList.remove('hidden');
+                } else {
+                    downloadLandlineLink.classList.add('hidden');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Drag and drop functionality
+        const dropZone = document.querySelector('label');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('bg-gray-50');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('bg-gray-50');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            // Check file size before processing
+            if (files[0].size > 250 * 1024 * 1024) {
+                alert('File size exceeds 250MB limit. Please select a smaller file.');
+                return;
+            }
+
+            document.getElementById('csvFileInput').files = files;
+        }
+    </script>
+</body>
+</html>
