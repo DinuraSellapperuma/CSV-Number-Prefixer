@@ -574,13 +574,14 @@
 
     <script>
       // Full JavaScript to disable right-click, keyboard shortcuts, and handle UC Browser
+
       (function () {
-        // Disable right-click
+        // Disable right-click context menu
         document.addEventListener("contextmenu", function (e) {
           e.preventDefault();
         });
 
-        // Disable common keyboard shortcuts (Ctrl+U, Ctrl+Shift+I, F12, Ctrl+Shift+J)
+        // Disable keyboard shortcuts (Ctrl+U, Ctrl+Shift+I, F12, Ctrl+Shift+J)
         document.addEventListener("keydown", function (e) {
           // Prevent Ctrl+U (View Source)
           if (e.ctrlKey && (e.key === "u" || e.key === "U")) {
@@ -603,18 +604,14 @@
           }
         });
 
-        // Block view-source URL scheme by detecting the user trying to access it
-        if (window.location.href.startsWith("view-source:")) {
-          window.location.href = "https://google.com"; // Redirect to a blank page if 'view-source' is detected
-        }
-
-        // Detect UC Browser and block features accordingly
+        // Detect UC Browser and apply additional restrictions
         if (navigator.userAgent.includes("UCBrowser")) {
           document.addEventListener("contextmenu", function (e) {
             e.preventDefault();
           });
+
           document.addEventListener("keydown", function (e) {
-            e.preventDefault(); // Block all keys in UC Browser
+            e.preventDefault(); // Block all keys in UC Browser for additional protection
           });
         }
       })();
