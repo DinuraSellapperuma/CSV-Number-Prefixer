@@ -16,8 +16,42 @@
             }
         }
     </script>
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast-enter {
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        .toast-exit {
+            animation: slideOut 0.3s ease forwards;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-4"></div>
+
     <div class="max-w-md w-full space-y-6">
         <!-- Main Card -->
         <div class="bg-white rounded-xl shadow-lg p-8 space-y-6">
@@ -87,7 +121,6 @@
 
             <!-- Download Buttons Container -->
             <div id="downloadButtons" class="hidden space-y-3">
-                <!-- Valid Numbers Download Button -->
                 <a id="downloadLink" class="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -95,7 +128,6 @@
                     Download Valid Numbers
                 </a>
                 
-                <!-- Invalid Numbers Download Button -->
                 <a id="downloadInvalidLink" class="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -103,7 +135,6 @@
                     Download Invalid Numbers
                 </a>
 
-                <!-- Landline Numbers Download Button -->
                 <a id="downloadLandlineLink" class="hidden w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -146,63 +177,52 @@
     </div>
 
     <script>
+        class Toast {
+            static show(message, type = 'error') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
+                const icon = type === 'error' 
+                    ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                    : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                
+                toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 toast-enter`;
+                toast.innerHTML = `
+                    ${icon}
+                    <span class="font-medium">${message}</span>
+                    <button class="ml-auto hover:opacity-75" onclick="this.parentElement.remove()">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                `;
+
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.replace('toast-enter', 'toast-exit');
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+            }
+        }
+
         function isValidSLNumber(number) {
-            // Remove any plus sign
-            number = number.replace(/^\+/, '');
-            
-            // Remove all non-digit characters
-            number = number.replace(/\D/g, '');
-            
-            // If starts with 94, remove it to check the base number
-            if (number.startsWith('94')) {
-                number = number.substring(2);
-            }
-            
-            // If starts with 0, remove it
-            if (number.startsWith('0')) {
-                number = number.substring(1);
-            }
-            
-            // Check if the remaining number is 9 digits and starts with 7
+            number = number.replace(/^\+/, '').replace(/\D/g, '');
+            if (number.startsWith('94')) number = number.substring(2);
+            if (number.startsWith('0')) number = number.substring(1);
             return number.length === 9 && number.startsWith('7');
         }
 
         function isLandlineNumber(number) {
-            // Remove any plus sign and non-digit characters
             number = number.replace(/^\+/, '').replace(/\D/g, '');
-            
-            // Remove 94 prefix if present
-            if (number.startsWith('94')) {
-                number = number.substring(2);
-            }
-            
-            // Remove leading 0 if present
-            if (number.startsWith('0')) {
-                number = number.substring(1);
-            }
-            
-            // Check if the remaining number is 9 digits and starts with 1-6 or 8-9
+            if (number.startsWith('94')) number = number.substring(2);
+            if (number.startsWith('0')) number = number.substring(1);
             return number.length === 9 && /^[1-689]/.test(number);
         }
 
         function formatSLNumber(number) {
-            // Remove any plus sign
-            number = number.replace(/^\+/, '');
-            
-            // Remove all non-digit characters
-            number = number.replace(/\D/g, '');
-            
-            // If already starts with 94, remove it
-            if (number.startsWith('94')) {
-                number = number.substring(2);
-            }
-            
-            // If starts with 0, remove it
-            if (number.startsWith('0')) {
-                number = number.substring(1);
-            }
-            
-            // Add 94 prefix
+            number = number.replace(/^\+/, '').replace(/\D/g, '');
+            if (number.startsWith('94')) number = number.substring(2);
+            if (number.startsWith('0')) number = number.substring(1);
             return '94' + number;
         }
 
@@ -210,132 +230,111 @@
             const fileInput = document.getElementById('csvFileInput');
             const file = fileInput.files[0];
             const filterLandline = document.getElementById('filterLandline').checked;
-            
+
             if (!file) {
-                alert('Please select a file.');
+                Toast.show('Please select a file.');
                 return;
             }
 
-            // Check file size (250MB = 250 * 1024 * 1024 bytes)
             if (file.size > 250 * 1024 * 1024) {
-                alert('File size exceeds 250MB limit. Please select a smaller file.');
+                Toast.show('File size exceeds 250MB limit. Please select a smaller file.');
+                return;
+            }
+
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                Toast.show('Please select a CSV file.');
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = function(event) {
-                const csvData = event.target.result;
-                const csvArray = csvData.split('\n').map(row => row.trim()).filter(row => row);
-                
-                let validNumbers = [];
-                let invalidNumbers = [];
-                let landlineNumbers = [];
-                
-                csvArray.forEach(row => {
-                    const number = row.trim();
-                    if (isValidSLNumber(number)) {
-                        validNumbers.push(formatSLNumber(number));
-                    } else if (isLandlineNumber(number)) {
-                        if (filterLandline) {
-                            landlineNumbers.push(formatSLNumber(number));
-                        } else {
-                            validNumbers.push(formatSLNumber(number));
-                        }
-                    } else {
-                        invalidNumbers.push(number);
+                try {
+                    const csvData = event.target.result;
+                    if (!csvData.trim()) {
+                        Toast.show('The file appears to be empty.');
+                        return;
                     }
-                });
 
-                // Show stats
-                const statsDiv = document.getElementById('stats');
-                const validCountElem = document.getElementById('validCount');
-                const invalidCountElem = document.getElementById('invalidCount');
-                const landlineCountElem = document.getElementById('landlineCount');
-                const landlineCountContainer = document.getElementById('landlineCountContainer');
-                
-                statsDiv.classList.remove('hidden');
-                validCountElem.textContent = `Valid numbers: ${validNumbers.length}`;
-                invalidCountElem.textContent = `Invalid numbers: ${invalidNumbers.length}`;
-                
-                if (filterLandline && landlineNumbers.length > 0) {
-                    landlineCountContainer.classList.remove('hidden');
-                    landlineCountElem.textContent = `Landline numbers: ${landlineNumbers.length}`;
-                } else {
-                    landlineCountContainer.classList.add('hidden');
-                }
+                    const csvArray = csvData.split('\n').map(row => row.trim()).filter(row => row);
+                    if (csvArray.length === 0) {
+                        Toast.show('No valid data found in the file.');
+                        return;
+                    }
 
-                // Show download buttons container
-                const downloadButtons = document.getElementById('downloadButtons');
-                downloadButtons.classList.remove('hidden');
+                    let validNumbers = [];
+                    let invalidNumbers = [];
+                    let landlineNumbers = [];
 
-                // Create valid numbers download link
-                const validBlob = new Blob([validNumbers.join('\n')], { type: 'text/csv' });
-                const downloadLink = document.getElementById('downloadLink');
-                downloadLink.href = URL.createObjectURL(validBlob);
-                downloadLink.download = 'valid_numbers.csv';
+                    csvArray.forEach(row => {
+                        const number = row.trim();
+                        if (isValidSLNumber(number)) {
+                            validNumbers.push(formatSLNumber(number));
+                        } else if (isLandlineNumber(number)) {
+                            if (filterLandline) {
+                                landlineNumbers.push(formatSLNumber(number));
+                            } else {
+                                validNumbers.push(formatSLNumber(number));
+                            }
+                        } else {
+                            invalidNumbers.push(number);
+                        }
+                    });
 
-                // Create invalid numbers download link
-                const invalidBlob = new Blob([invalidNumbers.join('\n')], { type: 'text/csv' });
-                const downloadInvalidLink = document.getElementById('downloadInvalidLink');
-                downloadInvalidLink.href = URL.createObjectURL(invalidBlob);
-                downloadInvalidLink.download = 'invalid_numbers.csv';
-
-                // Handle landline numbers download link
-                const downloadLandlineLink = document.getElementById('downloadLandlineLink');
-                if (filterLandline && landlineNumbers.length > 0) {
-                    const landlineBlob = new Blob([landlineNumbers.join('\n')], { type: 'text/csv' });
-                    downloadLandlineLink.href = URL.createObjectURL(landlineBlob);
-                    downloadLandlineLink.download = 'landline_numbers.csv';
-                    downloadLandlineLink.classList.remove('hidden');
-                } else {
-                    downloadLandlineLink.classList.add('hidden');
+                    Toast.show('File processed successfully!', 'success');
+                    updateUI(validNumbers, invalidNumbers, landlineNumbers, filterLandline);
+                } catch (error) {
+                    Toast.show('An error occurred while processing the file. Please try again.');
                 }
             };
-            
+
+            reader.onerror = function() {
+                Toast.show('An error occurred while reading the file. Please try again.');
+            };
+
             reader.readAsText(file);
         }
 
-        // Drag and drop functionality
-        const dropZone = document.querySelector('label');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
+        function updateUI(validNumbers, invalidNumbers, landlineNumbers, filterLandline) {
+            const statsDiv = document.getElementById('stats');
+            const validCountElem = document.getElementById('validCount');
+            const invalidCountElem = document.getElementById('invalidCount');
+            const landlineCountElem = document.getElementById('landlineCount');
+            const landlineCountContainer = document.getElementById('landlineCountContainer');
 
-        function preventDefaults (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
+            statsDiv.classList.remove('hidden');
+            validCountElem.textContent = `Valid numbers: ${validNumbers.length}`;
+            invalidCountElem.textContent = `Invalid numbers: ${invalidNumbers.length}`;
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight(e) {
-            dropZone.classList.add('bg-gray-50');
-        }
-
-        function unhighlight(e) {
-            dropZone.classList.remove('bg-gray-50');
-        }
-
-        dropZone.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-
-            // Check file size before processing
-            if (files[0].size > 250 * 1024 * 1024) {
-                alert('File size exceeds 250MB limit. Please select a smaller file.');
-                return;
+            if (filterLandline && landlineNumbers.length > 0) {
+                landlineCountContainer.classList.remove('hidden');
+                landlineCountElem.textContent = `Landline numbers: ${landlineNumbers.length}`;
+            } else {
+                landlineCountContainer.classList.add('hidden');
             }
 
-            document.getElementById('csvFileInput').files = files;
+            const downloadButtons = document.getElementById('downloadButtons');
+            downloadButtons.classList.remove('hidden');
+
+            const validBlob = new Blob([validNumbers.join('\n')], { type: 'text/csv' });
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = URL.createObjectURL(validBlob);
+            downloadLink.download = 'valid_numbers.csv';
+
+            const invalidBlob = new Blob([invalidNumbers.join('\n')], { type: 'text/csv' });
+            const downloadInvalidLink = document.getElementById('downloadInvalidLink');
+            downloadInvalidLink.href = URL.createObjectURL(invalidBlob);
+            downloadInvalidLink.download = 'invalid_numbers.csv';
+
+            if (filterLandline && landlineNumbers.length > 0) {
+                const landlineBlob = new Blob([landlineNumbers.join('\n')], { type: 'text/csv' });
+                const downloadLandlineLink = document.getElementById('downloadLandlineLink');
+                downloadLandlineLink.href = URL.createObjectURL(landlineBlob);
+                downloadLandlineLink.download = 'landline_numbers.csv';
+                downloadLandlineLink.classList.remove('hidden');
+            } else {
+                const downloadLandlineLink = document.getElementById('downloadLandlineLink');
+                downloadLandlineLink.classList.add('hidden');
+            }
         }
     </script>
 </body>
