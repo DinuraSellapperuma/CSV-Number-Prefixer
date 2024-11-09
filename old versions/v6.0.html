@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Previous head content remains the same -->
     <meta charset="UTF-8" />
     <meta
       name="viewport"
@@ -117,36 +116,17 @@
           </p>
         </div>
 
-        <!-- Toggle Switches -->
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700"
-              >Filter out landline numbers</span
-            >
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="filterLandline" class="sr-only peer" />
-              <div
-                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"
-              ></div>
-            </label>
-          </div>
-
-          <!-- New Toggle for Duplicate Numbers -->
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700"
-              >Remove duplicate numbers</span
-            >
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                id="removeDuplicates"
-                class="sr-only peer"
-              />
-              <div
-                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"
-              ></div>
-            </label>
-          </div>
+        <!-- Toggle Switch -->
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-700"
+            >Filter out landline numbers</span
+          >
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="filterLandline" class="sr-only peer" />
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"
+            ></div>
+          </label>
         </div>
 
         <!-- Upload Section -->
@@ -257,31 +237,11 @@
                 />
               </svg>
             </div>
-            <!-- New Duplicates Count Container -->
-            <div
-              id="duplicateCountContainer"
-              class="flex items-center justify-between hidden"
-            >
-              <span id="duplicateCount" class="text-sm text-yellow-600"></span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-yellow-500"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
           </div>
         </div>
 
-        <!-- Download Buttons -->
+        <!-- Download Buttons Container -->
         <div id="downloadButtons" class="hidden space-y-3">
-          <!-- Previous download buttons remain the same -->
           <a
             id="downloadLink"
             class="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
@@ -343,28 +303,6 @@
               ></path>
             </svg>
             Download Landline Numbers
-          </a>
-
-          <!-- New Download Button for Duplicate Numbers -->
-          <a
-            id="downloadDuplicateLink"
-            class="hidden w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
-          >
-            <svg
-              class="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              ></path>
-            </svg>
-            Download Duplicate Numbers
           </a>
         </div>
       </div>
@@ -436,7 +374,6 @@
     </div>
 
     <script>
-      // Previous Toast class remains the same
       class Toast {
         static show(message, type = "error") {
           const container = document.getElementById("toastContainer");
@@ -449,14 +386,14 @@
 
           toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 toast-enter`;
           toast.innerHTML = `
-            ${icon}
-            <span class="font-medium">${message}</span>
-            <button class="ml-auto hover:opacity-75" onclick="this.parentElement.remove()">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          `;
+                    ${icon}
+                    <span class="font-medium">${message}</span>
+                    <button class="ml-auto hover:opacity-75" onclick="this.parentElement.remove()">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                `;
 
           container.appendChild(toast);
           setTimeout(() => {
@@ -466,7 +403,6 @@
         }
       }
 
-      // Previous validation functions remain the same
       function isValidSLNumber(number) {
         number = number.replace(/^\+/, "").replace(/\D/g, "");
         if (number.startsWith("94")) number = number.substring(2);
@@ -493,8 +429,6 @@
         const file = fileInput.files[0];
         const filterLandline =
           document.getElementById("filterLandline").checked;
-        const removeDuplicates =
-          document.getElementById("removeDuplicates").checked;
 
         if (!file) {
           Toast.show("Please select a file.");
@@ -526,7 +460,6 @@
               .split("\n")
               .map((row) => row.trim())
               .filter((row) => row);
-
             if (csvArray.length === 0) {
               Toast.show("No valid data found in the file.");
               return;
@@ -535,38 +468,16 @@
             let validNumbers = [];
             let invalidNumbers = [];
             let landlineNumbers = [];
-            let duplicateNumbers = [];
-            let seenNumbers = new Set();
 
             csvArray.forEach((row) => {
               const number = row.trim();
-              const formattedNumber = formatSLNumber(number);
-
               if (isValidSLNumber(number)) {
-                if (removeDuplicates) {
-                  if (seenNumbers.has(formattedNumber)) {
-                    duplicateNumbers.push(formattedNumber);
-                  } else {
-                    seenNumbers.add(formattedNumber);
-                    validNumbers.push(formattedNumber);
-                  }
-                } else {
-                  validNumbers.push(formattedNumber);
-                }
+                validNumbers.push(formatSLNumber(number));
               } else if (isLandlineNumber(number)) {
                 if (filterLandline) {
-                  landlineNumbers.push(formattedNumber);
+                  landlineNumbers.push(formatSLNumber(number));
                 } else {
-                  if (removeDuplicates) {
-                    if (seenNumbers.has(formattedNumber)) {
-                      duplicateNumbers.push(formattedNumber);
-                    } else {
-                      seenNumbers.add(formattedNumber);
-                      validNumbers.push(formattedNumber);
-                    }
-                  } else {
-                    validNumbers.push(formattedNumber);
-                  }
+                  validNumbers.push(formatSLNumber(number));
                 }
               } else {
                 invalidNumbers.push(number);
@@ -578,9 +489,7 @@
               validNumbers,
               invalidNumbers,
               landlineNumbers,
-              duplicateNumbers,
-              filterLandline,
-              removeDuplicates
+              filterLandline
             );
           } catch (error) {
             Toast.show(
@@ -602,9 +511,7 @@
         validNumbers,
         invalidNumbers,
         landlineNumbers,
-        duplicateNumbers,
-        filterLandline,
-        removeDuplicates
+        filterLandline
       ) {
         const statsDiv = document.getElementById("stats");
         const validCountElem = document.getElementById("validCount");
@@ -612,10 +519,6 @@
         const landlineCountElem = document.getElementById("landlineCount");
         const landlineCountContainer = document.getElementById(
           "landlineCountContainer"
-        );
-        const duplicateCountElem = document.getElementById("duplicateCount");
-        const duplicateCountContainer = document.getElementById(
-          "duplicateCountContainer"
         );
 
         statsDiv.classList.remove("hidden");
@@ -629,17 +532,9 @@
           landlineCountContainer.classList.add("hidden");
         }
 
-        if (removeDuplicates && duplicateNumbers.length > 0) {
-          duplicateCountContainer.classList.remove("hidden");
-          duplicateCountElem.textContent = `Duplicate numbers: ${duplicateNumbers.length}`;
-        } else {
-          duplicateCountContainer.classList.add("hidden");
-        }
-
         const downloadButtons = document.getElementById("downloadButtons");
         downloadButtons.classList.remove("hidden");
 
-        // Update download links
         const validBlob = new Blob([validNumbers.join("\n")], {
           type: "text/csv",
         });
@@ -672,58 +567,51 @@
           );
           downloadLandlineLink.classList.add("hidden");
         }
-
-        if (removeDuplicates && duplicateNumbers.length > 0) {
-          const duplicateBlob = new Blob([duplicateNumbers.join("\n")], {
-            type: "text/csv",
-          });
-          const downloadDuplicateLink = document.getElementById(
-            "downloadDuplicateLink"
-          );
-          downloadDuplicateLink.href = URL.createObjectURL(duplicateBlob);
-          downloadDuplicateLink.download = "duplicate_numbers.csv";
-          downloadDuplicateLink.classList.remove("hidden");
-        } else {
-          const downloadDuplicateLink = document.getElementById(
-            "downloadDuplicateLink"
-          );
-          downloadDuplicateLink.classList.add("hidden");
-        }
       }
     </script>
 
-    <!-- Previous security script remains the same -->
+    <!--disable source code-->
+
     <script>
+      // Full JavaScript to disable right-click, keyboard shortcuts, and handle UC Browser
+
       (function () {
+        // Disable right-click context menu
         document.addEventListener("contextmenu", function (e) {
-          ee.preventDefault();
+          e.preventDefault();
         });
 
+        // Disable keyboard shortcuts (Ctrl+U, Ctrl+Shift+I, F12, Ctrl+Shift+J)
         document.addEventListener("keydown", function (e) {
+          // Prevent Ctrl+U (View Source)
           if (e.ctrlKey && (e.key === "u" || e.key === "U")) {
             e.preventDefault();
           }
 
+          // Prevent Ctrl+Shift+I (Dev Tools)
           if (e.ctrlKey && e.shiftKey && (e.key === "i" || e.key === "I")) {
             e.preventDefault();
           }
 
+          // Prevent F12 (Dev Tools)
           if (e.keyCode === 123) {
             e.preventDefault();
           }
 
+          // Prevent Ctrl+Shift+J (Console)
           if (e.ctrlKey && e.shiftKey && (e.key === "j" || e.key === "J")) {
             e.preventDefault();
           }
         });
 
+        // Detect UC Browser and apply additional restrictions
         if (navigator.userAgent.includes("UCBrowser")) {
           document.addEventListener("contextmenu", function (e) {
             e.preventDefault();
           });
 
           document.addEventListener("keydown", function (e) {
-            e.preventDefault();
+            e.preventDefault(); // Block all keys in UC Browser for additional protection
           });
         }
       })();
